@@ -5,8 +5,9 @@ import type { Cauldron, Market } from '@/lib/types'
 import Map, { Marker, Popup } from 'react-map-gl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Store, FlaskConical, AlertTriangle } from 'lucide-react'
+import { SidebarTrigger } from '../ui/sidebar';
 
-interface PotionNetworkMapProps {
+interface MapClientProps {
   cauldrons: Cauldron[]
   market: Market | null
 }
@@ -31,7 +32,7 @@ const MissingTokenCard = () => (
   </Card>
 )
 
-export default function PotionNetworkMap({ cauldrons, market }: PotionNetworkMapProps) {
+export default function MapClient({ cauldrons, market }: MapClientProps) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
   const [selected, setSelected] = useState<Cauldron | Market | null>(null)
 
@@ -40,23 +41,35 @@ export default function PotionNetworkMap({ cauldrons, market }: PotionNetworkMap
     : (cauldrons.length > 0 ? { latitude: cauldrons[0].latitude, longitude: cauldrons[0].longitude } : { latitude: 33.2148, longitude: -97.13 });
 
   if (!accessToken) {
-    return <MissingTokenCard />
+    return (
+        <div className="flex flex-col min-h-screen">
+            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:h-auto md:border-0 md:bg-transparent md:px-6">
+                <SidebarTrigger className="md:hidden" />
+                <div className="w-full flex-1 md:hidden" />
+                <h1 className="hidden text-2xl font-bold md:block font-headline">Map</h1>
+            </header>
+            <main className="flex-1 p-4 md:p-6">
+                <MissingTokenCard />
+            </main>
+        </div>
+    )
   }
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Potion Network</CardTitle>
-        <CardDescription>Live locations of all cauldrons and the market.</CardDescription>
-      </CardHeader>
-      <CardContent className="h-[450px] p-0">
-        <div className="w-full h-full rounded-b-lg overflow-hidden">
+    <div className="flex flex-col h-screen">
+      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:h-auto md:border-0 md:bg-transparent md:px-6">
+          <SidebarTrigger className="md:hidden" />
+          <div className="w-full flex-1 md:hidden" />
+          <h1 className="hidden text-2xl font-bold md:block font-headline">Map</h1>
+      </header>
+      <main className="flex-1 p-4 md:p-6 md:pt-0 flex">
+        <div className="w-full h-full rounded-lg overflow-hidden border">
           <Map
             mapboxAccessToken={accessToken}
             initialViewState={{
               longitude: mapCenter.longitude,
               latitude: mapCenter.latitude,
-              zoom: 9
+              zoom: 12
             }}
             style={{width: '100%', height: '100%'}}
             mapStyle="mapbox://styles/mapbox/dark-v11"
@@ -113,7 +126,7 @@ export default function PotionNetworkMap({ cauldrons, market }: PotionNetworkMap
             )}
           </Map>
         </div>
-      </CardContent>
-    </Card>
+      </main>
+    </div>
   )
 }

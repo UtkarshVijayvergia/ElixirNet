@@ -1,21 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { AuditData, Cauldron, Market } from '@/lib/types'
+import type { AuditData } from '@/lib/types'
 import { getAuditData } from '@/lib/api'
 import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import SummaryCards from './summary-cards'
 import DiscrepancyTables from './discrepancy-tables'
-import PotionNetworkMap from './potion-network-map'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card } from '../ui/card'
 
-interface DashboardClientProps {
-  cauldrons: Cauldron[];
-  market: Market | null;
-}
+interface DashboardClientProps {}
 
 const LoadingSkeleton = () => (
   <div className="space-y-8">
@@ -30,8 +26,8 @@ const LoadingSkeleton = () => (
         </Card>
       ))}
     </div>
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
-      <div className="lg:col-span-3">
+    <div className="grid grid-cols-1 gap-8">
+      <div>
         <Card className="h-full">
            <div className="p-6">
             <Skeleton className="h-6 w-1/2 mb-2" />
@@ -41,21 +37,12 @@ const LoadingSkeleton = () => (
           </div>
         </Card>
       </div>
-      <div className="lg:col-span-2">
-        <Card className="h-full">
-          <div className="p-6">
-            <Skeleton className="h-6 w-1/2 mb-2" />
-            <Skeleton className="h-4 w-3/4 mb-4" />
-            <Skeleton className="h-[450px] w-full" />
-          </div>
-        </Card>
-      </div>
     </div>
   </div>
 );
 
 
-export default function DashboardClient({ cauldrons, market }: DashboardClientProps) {
+export default function DashboardClient({}: DashboardClientProps) {
   const [auditData, setAuditData] = useState<AuditData | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -86,17 +73,10 @@ export default function DashboardClient({ cauldrons, market }: DashboardClientPr
         {auditData && (
           <>
             <SummaryCards summary={auditData.summary} />
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
-              <div className="lg:col-span-3">
-                <DiscrepancyTables 
-                  dailyAudit={auditData.daily_audit} 
-                  mismatchedTickets={auditData.mismatched_tickets} 
-                />
-              </div>
-              <div className="lg:col-span-2">
-                <PotionNetworkMap cauldrons={cauldrons} market={market} />
-              </div>
-            </div>
+            <DiscrepancyTables 
+              dailyAudit={auditData.daily_audit} 
+              mismatchedTickets={auditData.mismatched_tickets} 
+            />
           </>
         )}
       </main>

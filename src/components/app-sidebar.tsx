@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
 import PotionTrackLogo from '@/components/icons/potion-track-logo'
-import { Home, BarChart2 } from 'lucide-react'
+import { Home, BarChart2, Map } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AppSidebar() {
@@ -36,6 +36,14 @@ export default function AppSidebar() {
               <Link href="/visualizations">
                 <BarChart2 />
                 Visualizations
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname === '/map'} tooltip="Map">
+              <Link href="/map">
+                <Map />
+                Map
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
