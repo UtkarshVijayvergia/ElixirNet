@@ -128,7 +128,7 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
             </CardHeader>
             <CardContent className="h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
+                <BarChart data={data} barGap={0}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="cauldron_id" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} unit="L" />
