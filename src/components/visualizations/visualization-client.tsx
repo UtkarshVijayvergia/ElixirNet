@@ -41,6 +41,7 @@ export default function VisualizationClient() {
   const [cauldrons, setCauldrons] = useState<Cauldron[]>([]);
   const [date, setDate] = useState<Date | undefined>(() => {
       const dateParam = searchParams.get('date');
+      // Add timezone offset to avoid hydration mismatch
       return dateParam ? new Date(`${dateParam}T00:00:00`) : new Date();
   });
   const [loading, setLoading] = useState(true);
