@@ -381,3 +381,5 @@ export default function OptimizationClient({ cauldrons, market }: OptimizationCl
     </div>
   )
 }
+
+    
