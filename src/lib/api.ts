@@ -84,16 +84,3 @@ export async function getNetworkData(): Promise<NetworkData | null> {
     return null;
   }
 }
-
-export async function getOptimizationData(): Promise<OptimizationData | null> {
-  try {
-    const response = await fetch('/api/optimization');
-    if (!response.ok) {
-      throw new Error(`Failed to fetch optimization data: ${response.statusText}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error('Could not fetch optimization data:', error);
-    return null;
-  }
-}

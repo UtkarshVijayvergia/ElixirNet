@@ -13,7 +13,6 @@ import { Badge } from '../ui/badge';
 import { format, parseISO } from 'date-fns';
 
 interface OptimizationClientProps {
-  optimizationData: OptimizationData | null
   cauldrons: Cauldron[]
   market: Market | null
 }
@@ -78,20 +77,34 @@ const MissingTokenCard = () => (
   </Card>
 )
 
-export default function OptimizationClient({ optimizationData, cauldrons, market }: OptimizationClientProps) {
+export default function OptimizationClient({ cauldrons, market }: OptimizationClientProps) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
   const [selected, setSelected] = useState<Cauldron | Market | null>(null)
   const mapRef = useRef<MapRef>(null);
 
-  const [loading, setLoading] = useState(!optimizationData);
+  const [optimizationData, setOptimizationData] = useState<OptimizationData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  
   useEffect(() => {
-    if (!optimizationData) {
-        setError('Failed to load optimization data. Please ensure the local optimization server is running.');
-        setLoading(false);
+    async function getOptimizationData() {
+        try {
+            const response = await fetch('/api/optimization');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch optimization data: ${response.statusText}`);
+            }
+            const data = await response.json();
+            setOptimizationData(data);
+        } catch (error) {
+            console.error('Could not fetch optimization data:', error);
+            setError('Failed to load optimization data. Please ensure the local optimization server is running.');
+        } finally {
+            setLoading(false);
+        }
     }
-  }, [optimizationData]);
+    getOptimizationData();
+  }, [])
+
 
   const nodeMap = useMemo(() => {
     const map = new Map<string, { latitude: number; longitude: number; name: string }>();
@@ -137,7 +150,9 @@ export default function OptimizationClient({ optimizationData, cauldrons, market
         let currentNode = witch.current_node;
         return witch.route.map((step, stepIndex) => {
             const fromNode = nodeMap.get(currentNode);
-            const toNodeId = step.type === 'collect' ? step.cauldron_id : step.market_node;
+            // In the data, the 'type' field is 'market_unload' not 'unload'
+            const toNodeId = step.type === 'collect' ? step.cauldron_id : (step.type === 'market_unload' ? step.market_node : '');
+            if (!toNodeId) return null;
             const toNode = nodeMap.get(toNodeId);
 
             currentNode = toNodeId; // Update current node for next step
@@ -177,7 +192,7 @@ export default function OptimizationClient({ optimizationData, cauldrons, market
       )
   }
 
-  if (error) {
+  if (error || !optimizationData) {
     return (
         <div className="flex flex-col min-h-screen">
             <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:h-auto md:border-0 md:bg-transparent md:px-6">
