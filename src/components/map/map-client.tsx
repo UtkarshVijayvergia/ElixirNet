@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { Cauldron, Market, TransportTicket, GeoJSONFeature } from '@/lib/types'
 import { getCauldronNeighbors } from '@/lib/api'
 import MapGL, { Marker, Popup, Source, Layer } from 'react-map-gl';
@@ -37,6 +37,16 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
   const [selected, setSelected] = useState<Cauldron | Market | null>(null)
   const [connections, setConnections] = useState<TransportTicket[]>([])
+  const [accentColor, setAccentColor] = useState('');
+
+  useEffect(() => {
+    // We need to get the computed style of the accent color because Mapbox layers
+    // do not support CSS variables directly. This runs only on the client.
+    if (typeof window !== 'undefined') {
+      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+      setAccentColor(`hsl(${color})`);
+    }
+  }, []);
   
   const cauldronMap = useMemo(() => new Map(cauldrons.map(c => [c.id, c])), [cauldrons])
 
@@ -171,12 +181,12 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
               </Popup>
             )}
 
-            <Source id="lines" type="geojson" data={lineGeoJson}>
+            {accentColor && <Source id="lines" type="geojson" data={lineGeoJson}>
               <Layer
                 id="line-layer"
                 type="line"
                 paint={{
-                  'line-color': 'hsl(var(--accent))',
+                  'line-color': accentColor,
                   'line-width': 2,
                   'line-opacity': 0.8
                 }}
@@ -195,10 +205,10 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
                   "icon-rotation-alignment": "map",
                 }}
                  paint={{
-                    "icon-color": "hsl(var(--accent))",
+                    "icon-color": accentColor,
                  }}
               />
-            </Source>
+            </Source>}
           </MapGL>
         </div>
       </main>
