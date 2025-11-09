@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import type { Cauldron, Market, NetworkData } from '@/lib/types'
-import MapGL, { Marker, Popup, Source, Layer } from 'react-map-gl';
+import MapGL, { Marker, Popup, Source, Layer, MapRef } from 'react-map-gl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Store, FlaskConical, AlertTriangle } from 'lucide-react'
 import { SidebarTrigger } from '../ui/sidebar';
@@ -38,10 +38,9 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
   const [selected, setSelected] = useState<Cauldron | Market | null>(null)
   const [accentColor, setAccentColor] = useState('');
   const [network, setNetwork] = useState<NetworkData | null>(null);
+  const mapRef = useRef<MapRef>(null);
 
   useEffect(() => {
-    // We need to get the computed style of the accent color because Mapbox layers
-    // do not support CSS variables directly. This runs only on the client.
     if (typeof window !== 'undefined') {
       const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
       const [h, s, l] = colorValue.split(' ');
@@ -77,6 +76,21 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
   const handleClosePopup = () => {
     setSelected(null);
   }
+
+  const handleMapLoad = () => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+    
+    // Create a white triangle SVG icon. Mapbox can color this dynamically.
+    const size = 150;
+    const arrow = new Image(size, size);
+    arrow.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='white' stroke='none'%3E%3Cpath d='M12 2L2 22h20L12 2z'/%3E%3C/svg%3E";
+    arrow.onload = () => {
+      if (!map.hasImage('arrow')) {
+        map.addImage('arrow', arrow, { sdf: true });
+      }
+    };
+  };
 
   const lineGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString> = useMemo(() => {
     if (!network?.edges || nodeMap.size === 0) {
@@ -132,6 +146,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
       <main className="flex-1 p-4 md:p-6 md:pt-0 flex">
         <div className="w-full h-full rounded-lg overflow-hidden border">
           <MapGL
+            ref={mapRef}
             mapboxAccessToken={accessToken}
             initialViewState={{
               longitude: mapCenter.longitude,
@@ -141,6 +156,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
             style={{width: '100%', height: '100%'}}
             mapStyle="mapbox://styles/mapbox/dark-v11"
             onClick={handleClosePopup}
+            onLoad={handleMapLoad}
           >
             {market && (
               <Marker 
@@ -206,11 +222,12 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
                <Layer
                 id="arrow-layer"
                 type="symbol"
+                source="lines"
                 layout={{
                   "symbol-placement": "line",
-                  "symbol-spacing": 50,
-                  "icon-image": "triangle-15",
-                  "icon-size": 1.5,
+                  "symbol-spacing": 75,
+                  "icon-image": "arrow",
+                  "icon-size": 0.1,
                   "icon-allow-overlap": true,
                   "icon-ignore-placement": true,
                   "icon-rotate": 90,
