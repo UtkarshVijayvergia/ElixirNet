@@ -53,3 +53,32 @@ export type UnloggedDrainChartData = {
   cauldron_id: string;
   unlogged: number;
 };
+
+export type TransportTicket = {
+  ticket_id: string;
+  cauldron_id: string; // This is the destination cauldron
+  amount_collected: number;
+  courier_id: string;
+  date: string;
+};
+
+export type TransportData = {
+  metadata: {
+    total_tickets: number;
+    suspicious_tickets: number;
+    date_range: {
+      start: string;
+      end: string;
+    };
+  };
+  transport_tickets: TransportTicket[];
+};
+
+export type GeoJSONFeature = {
+  type: 'Feature';
+  geometry: {
+    type: 'LineString';
+    coordinates: [number, number][];
+  };
+  properties: Record<string, any>;
+};

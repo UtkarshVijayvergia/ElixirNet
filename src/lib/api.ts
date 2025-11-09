@@ -1,4 +1,4 @@
-import type { AuditData, Cauldron, Market, UnloggedDrainChartData } from './types';
+import type { AuditData, Cauldron, Market, TransportData, UnloggedDrainChartData } from './types';
 
 // In a real application, you would fetch from the API endpoint.
 export async function getAuditData(): Promise<AuditData> {
@@ -70,11 +70,16 @@ export function processUnloggedDrainData(auditData: AuditData, cauldrons: Cauldr
   return chartData.filter(d => d.unlogged > 0);
 }
 
-
-export async function getComparisonData(date: string): Promise<UnloggedDrainChartData[]> {
-  const [auditData, cauldrons] = await Promise.all([
-    getAuditData(),
-    getCauldrons(),
-  ]);
-  return processUnloggedDrainData(auditData, cauldrons, date);
+export async function getCauldronNeighbors(nodeId: string): Promise<TransportData> {
+  try {
+    const response = await fetch(`https://hackutd2025.eog.systems/api/Information/graph/neighbors/directed/${nodeId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch neighbor data: ${response.statusText}`);
+      return { metadata: { total_tickets: 0, suspicious_tickets: 0, date_range: { start: '', end: '' } }, transport_tickets: [] };
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Could not fetch neighbor data for ${nodeId}:`, error);
+    return { metadata: { total_tickets: 0, suspicious_tickets: 0, date_range: { start: '', end: '' } }, transport_tickets: [] };
+  }
 }

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import type { Cauldron, Market } from '@/lib/types'
-import Map, { Marker, Popup } from 'react-map-gl';
+import { useState, useMemo } from 'react'
+import type { Cauldron, Market, TransportTicket, GeoJSONFeature } from '@/lib/types'
+import { getCauldronNeighbors } from '@/lib/api'
+import Map, { Marker, Popup, Source, Layer } from 'react-map-gl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Store, FlaskConical, AlertTriangle } from 'lucide-react'
 import { SidebarTrigger } from '../ui/sidebar';
@@ -35,11 +36,56 @@ const MissingTokenCard = () => (
 export default function MapClient({ cauldrons, market }: MapClientProps) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
   const [selected, setSelected] = useState<Cauldron | Market | null>(null)
+  const [connections, setConnections] = useState<TransportTicket[]>([])
+  
+  const cauldronMap = useMemo(() => new Map(cauldrons.map(c => [c.id, c])), [cauldrons])
 
   const mapCenter = market 
     ? { latitude: market.latitude, longitude: market.longitude } 
     : (cauldrons.length > 0 ? { latitude: cauldrons[0].latitude, longitude: cauldrons[0].longitude } : { latitude: 33.2148, longitude: -97.13 });
+  
+  const handleMarkerClick = async (item: Cauldron | Market) => {
+    setSelected(item);
+    if ('max_volume' in item) { // It's a Cauldron
+      const neighborData = await getCauldronNeighbors(item.id);
+      setConnections(neighborData.transport_tickets);
+    } else {
+      setConnections([]);
+    }
+  }
 
+  const handleClosePopup = () => {
+    setSelected(null);
+    setConnections([]);
+  }
+
+  const lineGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString> = useMemo(() => {
+    if (!selected || !('longitude' in selected) || connections.length === 0) {
+      return { type: 'FeatureCollection', features: [] };
+    }
+
+    const origin = selected as Cauldron;
+
+    const features: GeoJSON.Feature<GeoJSON.LineString>[] = connections.map(ticket => {
+      const destination = cauldronMap.get(ticket.cauldron_id);
+      if (!destination) return null;
+
+      return {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [origin.longitude, origin.latitude],
+            [destination.longitude, destination.latitude],
+          ],
+        },
+      };
+    }).filter((feature): feature is GeoJSON.Feature<GeoJSON.LineString> => feature !== null);
+
+    return { type: 'FeatureCollection', features };
+  }, [selected, connections, cauldronMap]);
+  
   if (!accessToken) {
     return (
         <div className="flex flex-col min-h-screen">
@@ -80,7 +126,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
                 latitude={market.latitude}
                 onClick={e => {
                   e.originalEvent.stopPropagation();
-                  setSelected(market);
+                  handleMarkerClick(market)
                 }}
               >
                 <button className="transform transition-transform hover:scale-110 focus:outline-none">
@@ -96,7 +142,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
                 latitude={cauldron.latitude}
                 onClick={e => {
                   e.originalEvent.stopPropagation();
-                  setSelected(cauldron);
+                  handleMarkerClick(cauldron);
                 }}
               >
                  <button className="transform transition-transform hover:scale-110 focus:outline-none">
@@ -109,7 +155,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
               <Popup
                 longitude={selected.longitude}
                 latitude={selected.latitude}
-                onClose={() => setSelected(null)}
+                onClose={handleClosePopup}
                 anchor="bottom"
                 closeButton={false}
                 offset={40}
@@ -124,6 +170,35 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
                   </div>
               </Popup>
             )}
+
+            <Source id="lines" type="geojson" data={lineGeoJson}>
+              <Layer
+                id="line-layer"
+                type="line"
+                paint={{
+                  'line-color': 'hsl(var(--accent))',
+                  'line-width': 2,
+                  'line-opacity': 0.8
+                }}
+              />
+               <Layer
+                id="arrow-layer"
+                type="symbol"
+                layout={{
+                  "symbol-placement": "line",
+                  "symbol-spacing": 50,
+                  "icon-image": "triangle-15",
+                  "icon-size": 1.5,
+                  "icon-allow-overlap": true,
+                  "icon-ignore-placement": true,
+                  "icon-rotate": 90,
+                  "icon-rotation-alignment": "map",
+                }}
+                 paint={{
+                    "icon-color": "hsl(var(--accent))",
+                 }}
+              />
+            </Source>
           </Map>
         </div>
       </main>
