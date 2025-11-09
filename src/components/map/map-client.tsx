@@ -6,11 +6,11 @@ import MapGL, { Marker, Popup, Source, Layer } from 'react-map-gl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Store, FlaskConical, AlertTriangle } from 'lucide-react'
 import { SidebarTrigger } from '../ui/sidebar';
+import { getNetworkData } from '@/lib/api';
 
 interface MapClientProps {
   cauldrons: Cauldron[]
   market: Market | null
-  network: NetworkData | null
 }
 
 const MissingTokenCard = () => (
@@ -33,10 +33,11 @@ const MissingTokenCard = () => (
   </Card>
 )
 
-export default function MapClient({ cauldrons, market, network }: MapClientProps) {
+export default function MapClient({ cauldrons, market }: MapClientProps) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
   const [selected, setSelected] = useState<Cauldron | Market | null>(null)
   const [accentColor, setAccentColor] = useState('');
+  const [network, setNetwork] = useState<NetworkData | null>(null);
 
   useEffect(() => {
     // We need to get the computed style of the accent color because Mapbox layers
@@ -48,6 +49,14 @@ export default function MapClient({ cauldrons, market, network }: MapClientProps
     }
   }, []);
   
+  useEffect(() => {
+    async function fetchNetworkData() {
+      const data = await getNetworkData();
+      setNetwork(data);
+    }
+    fetchNetworkData();
+  }, []);
+
   const cauldronMap = useMemo(() => new Map(cauldrons.map(c => [c.id, c])), [cauldrons])
 
   const mapCenter = market 
