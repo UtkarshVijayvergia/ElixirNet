@@ -47,3 +47,9 @@ export type Market = {
   latitude: number;
   longitude: number;
 };
+
+export type ComparisonChartData = {
+  cauldron_id: string;
+  reported: number;
+  actual: number;
+};

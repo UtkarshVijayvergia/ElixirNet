@@ -1,4 +1,4 @@
-import type { AuditData, Cauldron, Market } from './types';
+import type { AuditData, Cauldron, Market, ComparisonChartData } from './types';
 import { mockAuditData } from './mock-data';
 
 // In a real application, you would fetch from the API endpoint.
@@ -42,4 +42,35 @@ export async function getMarket(): Promise<Market | null> {
     console.error('Could not fetch market data:', error);
     return null;
   }
+}
+
+export async function getComparisonData(date: string): Promise<ComparisonChartData[]> {
+  // This is a mock implementation. In a real app, you'd fetch this from your API.
+  const auditData = await getAuditData();
+  const cauldrons = await getCauldrons();
+  
+  const cauldronNameMap = cauldrons.reduce((acc, cauldron) => {
+    acc[cauldron.id] = cauldron.name;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const dataForDate = auditData.mismatched_tickets
+    .map(ticket => ({
+        cauldron_id: cauldronNameMap[ticket.cauldron_id] || ticket.cauldron_id,
+        reported: ticket.ticket_volume,
+        actual: ticket.detected_volume,
+    }));
+    
+  // Add some mock data for other cauldrons for a fuller chart
+  const otherCauldrons = cauldrons.filter(c => !dataForDate.some(d => d.cauldron_id === c.name)).slice(0, 5);
+  otherCauldrons.forEach(c => {
+    const reported = Math.random() * 500 + 50;
+    dataForDate.push({
+        cauldron_id: c.name,
+        reported: reported,
+        actual: reported - (Math.random() * 50 - 25), // a little variation
+    });
+  });
+
+  return dataForDate;
 }
