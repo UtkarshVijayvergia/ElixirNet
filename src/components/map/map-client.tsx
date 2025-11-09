@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react'
 import type { Cauldron, Market, TransportTicket, GeoJSONFeature } from '@/lib/types'
 import { getCauldronNeighbors } from '@/lib/api'
-import Map, { Marker, Popup, Source, Layer } from 'react-map-gl';
+import Map from 'react-map-gl';
+import { Marker, Popup, Source, Layer } from 'react-map-gl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Store, FlaskConical, AlertTriangle } from 'lucide-react'
 import { SidebarTrigger } from '../ui/sidebar';
