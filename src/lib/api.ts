@@ -2,19 +2,12 @@ import type { AuditData, Cauldron, Market, ComparisonChartData } from './types';
 import { mockAuditData, mockCauldronData, mockMarketData } from './mock-data';
 
 // In a real application, you would fetch from the API endpoint.
-// For this example, we are using mock data as localhost is not accessible during build.
 export async function getAuditData(): Promise<AuditData> {
-  try {
-    const response = await fetch('http://localhost:8000/api/audit/run', { cache: 'no-store' });
-    if (!response.ok) {
-      console.error('Failed to fetch audit data, using mock data as fallback.');
-      return mockAuditData;
-    }
-    return response.json();
-  } catch (error) {
-    console.error('Could not fetch audit data, using mock data instead:', error);
-    return mockAuditData;
+  const response = await fetch('http://localhost:8000/api/audit/run', { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error('Failed to fetch audit data');
   }
+  return response.json();
 }
 
 export async function getCauldrons(): Promise<Cauldron[]> {
