@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import type { Cauldron, Market, TransportTicket, GeoJSONFeature } from '@/lib/types'
+import type { Cauldron, Market, TransportTicket } from '@/lib/types'
 import { getCauldronNeighbors } from '@/lib/api'
 import MapGL, { Marker, Popup, Source, Layer } from 'react-map-gl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,8 +43,9 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
     // We need to get the computed style of the accent color because Mapbox layers
     // do not support CSS variables directly. This runs only on the client.
     if (typeof window !== 'undefined') {
-      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-      setAccentColor(`hsl(${color})`);
+      const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      const [h, s, l] = colorValue.split(' ');
+      setAccentColor(`hsl(${h}, ${s}, ${l})`);
     }
   }, []);
   
