@@ -24,23 +24,27 @@ export default function VisualizationClient({ initialData, initialDate }: Visual
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [data, setData] = useState(initialData)
-  const [date, setDate] = useState<Date | undefined>(new Date(initialDate))
+  // Add 'T00:00:00' to ensure the date is parsed in UTC to avoid timezone issues.
+  const [date, setDate] = useState<Date | undefined>(new Date(`${initialDate}T00:00:00`))
 
   useEffect(() => {
     if (date) {
       const newDate = format(date, 'yyyy-MM-dd')
       const current = new URLSearchParams(Array.from(searchParams.entries()));
-      current.set('date', newDate);
-      const search = current.toString();
-      const query = search ? `?${search}` : "";
       
-      // Fetch new data when date changes and update URL
-      getComparisonData(newDate).then(newData => {
-        setData(newData);
-        router.push(`${pathname}${query}`);
-      });
+      if (newDate !== initialDate) {
+        current.set('date', newDate);
+        const search = current.toString();
+        const query = search ? `?${search}` : "";
+        
+        // Fetch new data when date changes and update URL
+        getComparisonData(newDate).then(newData => {
+          setData(newData);
+          router.push(`${pathname}${query}`);
+        });
+      }
     }
-  }, [date, pathname, router, searchParams])
+  }, [date, pathname, router, searchParams, initialDate])
 
   return (
     <div className="flex flex-col min-h-screen">
