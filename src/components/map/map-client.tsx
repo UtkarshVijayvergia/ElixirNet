@@ -59,7 +59,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
     setSelected(item);
     if ('max_volume' in item) { // It's a Cauldron
       const neighborData = await getCauldronNeighbors(item.id);
-      setConnections(neighborData.transport_tickets);
+      setConnections(neighborData.transport_tickets || []);
     } else {
       setConnections([]);
     }
