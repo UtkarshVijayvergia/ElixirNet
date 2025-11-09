@@ -89,7 +89,7 @@ export default function OptimizationClient({ cauldrons, market }: OptimizationCl
   useEffect(() => {
     async function getOptimizationData() {
         try {
-            const response = await fetch('/api/optimization');
+            const response = await fetch('http://localhost:8000/api/optimization/run');
             if (!response.ok) {
                 throw new Error(`Failed to fetch optimization data: ${response.statusText}`);
             }
