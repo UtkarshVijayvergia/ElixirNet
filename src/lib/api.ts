@@ -45,7 +45,7 @@ export function processUnloggedDrainData(auditData: AuditData, cauldrons: Cauldr
 
   const dataMap = new Map<string, { unlogged: number }>();
 
-  // Initialize with all cauldrons to ensure they appear in the chart if they have data
+  // Initialize with all cauldrons to ensure they appear in the chart
   cauldrons.forEach(c => {
     dataMap.set(c.name, { unlogged: 0 });
   });
@@ -70,9 +70,11 @@ export function processUnloggedDrainData(auditData: AuditData, cauldrons: Cauldr
   return chartData.filter(d => d.unlogged > 0);
 }
 
+
 export async function getCauldronNeighbors(nodeId: string): Promise<TransportData> {
   try {
-    const response = await fetch(`https://hackutd2025.eog.systems/api/Information/graph/neighbors/directed/${nodeId}`);
+    // Call the internal API route instead of the external one
+    const response = await fetch(`/api/neighbors/${nodeId}`);
     if (!response.ok) {
       console.error(`Failed to fetch neighbor data: ${response.statusText}`);
       return { metadata: { total_tickets: 0, suspicious_tickets: 0, date_range: { start: '', end: '' } }, transport_tickets: [] };
