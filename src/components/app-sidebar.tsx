@@ -24,7 +24,7 @@ export default function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/" legacyBehavior passHref>
+            <Link href="/">
               <SidebarMenuButton isActive={pathname === '/'} tooltip="Dashboard">
                 <Home />
                 Dashboard
@@ -32,7 +32,7 @@ export default function AppSidebar() {
             </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
-             <Link href="/visualizations" legacyBehavior passHref>
+             <Link href="/visualizations">
               <SidebarMenuButton isActive={pathname === '/visualizations'} tooltip="Visualizations">
                 <BarChart2 />
                 Visualizations
