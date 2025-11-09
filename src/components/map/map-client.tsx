@@ -57,7 +57,14 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
     fetchNetworkData();
   }, []);
 
-  const cauldronMap = useMemo(() => new Map(cauldrons.map(c => [c.id, c])), [cauldrons])
+  const nodeMap = useMemo(() => {
+    const map = new Map<string, { latitude: number; longitude: number }>();
+    cauldrons.forEach(c => map.set(c.id, c));
+    if (market) {
+      map.set(market.id, market);
+    }
+    return map;
+  }, [cauldrons, market]);
 
   const mapCenter = market 
     ? { latitude: market.latitude, longitude: market.longitude } 
@@ -72,15 +79,16 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
   }
 
   const lineGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString> = useMemo(() => {
-    if (!network?.edges || cauldronMap.size === 0) {
+    if (!network?.edges || nodeMap.size === 0) {
       return { type: 'FeatureCollection', features: [] };
     }
-
+  
     const features: GeoJSON.Feature<GeoJSON.LineString>[] = network.edges.map(edge => {
-      const origin = cauldronMap.get(edge.from);
-      const destination = cauldronMap.get(edge.to);
+      const origin = nodeMap.get(edge.from);
+      const destination = nodeMap.get(edge.to);
+  
       if (!origin || !destination) return null;
-
+  
       return {
         type: 'Feature',
         properties: {
@@ -95,9 +103,9 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
         },
       };
     }).filter((feature): feature is GeoJSON.Feature<GeoJSON.LineString> => feature !== null);
-
+  
     return { type: 'FeatureCollection', features };
-  }, [network, cauldronMap]);
+  }, [network, nodeMap]);
   
   if (!accessToken) {
     return (
