@@ -49,6 +49,16 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      setDate(selectedDate);
+      const dateString = format(selectedDate, 'yyyy-MM-dd');
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.set('date', dateString);
+      router.push(`${pathname}?${newSearchParams.toString()}`);
+    }
+  };
+
   const fetchData = useCallback(async (selectedDate: Date) => {
     setLoading(true);
     setError(null);
@@ -59,17 +69,13 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
         const comparisonData = processComparisonData(auditData, cauldrons, dateString);
         setData(comparisonData);
 
-        const newSearchParams = new URLSearchParams(searchParams.toString());
-        newSearchParams.set('date', dateString);
-        router.push(`${pathname}?${newSearchParams.toString()}`);
-
     } catch (e) {
       console.error(e);
       setError('Failed to load visualization data. Please ensure the local audit server is running.');
     } finally {
       setLoading(false);
     }
-  }, [cauldrons, pathname, router, searchParams]);
+  }, [cauldrons]);
 
   useEffect(() => {
     if (date) {
@@ -113,7 +119,7 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
                     <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={handleDateSelect}
                         initialFocus
                     />
                     </PopoverContent>
