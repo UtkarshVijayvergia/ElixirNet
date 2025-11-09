@@ -18,7 +18,7 @@ export async function getCauldrons(): Promise<Cauldron[]> {
     }
     return response.json();
   } catch (error) {
-    console.error('Could not fetch cauldron data', error);
+    console.error('Could not fetch cauldron data:', error);
     return [];
   }
 }
