@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import type { ComparisonChartData, Cauldron, AuditData } from '@/lib/types'
+import type { UnloggedDrainChartData, Cauldron } from '@/lib/types'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -11,7 +11,7 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
-import { getAuditData, processComparisonData } from '@/lib/api'
+import { getAuditData, processUnloggedDrainData } from '@/lib/api'
 import { SidebarTrigger } from '../ui/sidebar'
 import { Skeleton } from '../ui/skeleton'
 
@@ -41,7 +41,7 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [data, setData] = useState<ComparisonChartData[]>([])
+  const [data, setData] = useState<UnloggedDrainChartData[]>([])
   const [date, setDate] = useState<Date | undefined>(() => {
       const dateParam = searchParams.get('date');
       return dateParam ? new Date(dateParam + 'T00:00:00') : new Date();
@@ -66,8 +66,8 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
         const dateString = format(selectedDate, 'yyyy-MM-dd');
         const auditData = await getAuditData();
         
-        const comparisonData = processComparisonData(auditData, cauldrons, dateString);
-        setData(comparisonData);
+        const unloggedDrainData = processUnloggedDrainData(auditData, cauldrons, dateString);
+        setData(unloggedDrainData);
 
     } catch (e) {
       console.error(e);
@@ -99,8 +99,8 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
             <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <CardTitle>Comparative Analysis</CardTitle>
-                    <CardDescription>Actual vs. Reported Potion Drain by Cauldron</CardDescription>
+                    <CardTitle>Unlogged Potion Drain</CardTitle>
+                    <CardDescription>Volume of unlogged potion drain by cauldron.</CardDescription>
                 </div>
                 <Popover>
                     <PopoverTrigger asChild>
@@ -128,7 +128,7 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
             </CardHeader>
             <CardContent className="h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} barGap={0}>
+                <BarChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="cauldron_id" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} unit="L" />
@@ -139,8 +139,7 @@ export default function VisualizationClient({ cauldrons }: VisualizationClientPr
                     }}
                     />
                     <Legend />
-                    <Bar dataKey="reported" fill="hsl(var(--primary))" name="Reported Drain" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="actual" fill="hsl(var(--accent))" name="Actual Drain" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="unlogged" fill="hsl(var(--primary))" name="Unlogged Drain" radius={[4, 4, 0, 0]} />
                 </BarChart>
                 </ResponsiveContainer>
             </CardContent>

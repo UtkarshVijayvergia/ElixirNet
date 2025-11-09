@@ -49,8 +49,7 @@ export type Market = {
   longitude: number;
 };
 
-export type ComparisonChartData = {
+export type UnloggedDrainChartData = {
   cauldron_id: string;
-  reported: number;
-  actual: number;
+  unlogged: number;
 };
