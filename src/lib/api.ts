@@ -1,5 +1,4 @@
 import type { AuditData, Cauldron, Market, ComparisonChartData } from './types';
-import { mockAuditData, mockCauldronData, mockMarketData } from './mock-data';
 
 // In a real application, you would fetch from the API endpoint.
 export async function getAuditData(): Promise<AuditData> {
@@ -14,13 +13,13 @@ export async function getCauldrons(): Promise<Cauldron[]> {
   try {
     const response = await fetch('https://hackutd2025.eog.systems/api/Information/cauldrons', { next: { revalidate: 3600 } });
     if (!response.ok) {
-       console.error(`Failed to fetch cauldron data: ${response.statusText}, using mock data.`);
-       return mockCauldronData;
+       console.error(`Failed to fetch cauldron data: ${response.statusText}`);
+       return [];
     }
     return response.json();
   } catch (error) {
-    console.error('Could not fetch cauldron data, using mock data instead:', error);
-    return mockCauldronData;
+    console.error('Could not fetch cauldron data', error);
+    return [];
   }
 }
 
@@ -28,20 +27,17 @@ export async function getMarket(): Promise<Market | null> {
   try {
     const response = await fetch('https://hackutd2025.eog.systems/api/Information/market', { next: { revalidate: 3600 } });
     if (!response.ok) {
-      console.error(`Failed to fetch market data: ${response.statusText}, using mock data.`);
-      return mockMarketData;
+      console.error(`Failed to fetch market data: ${response.statusText}`);
+      return null;
     }
     return response.json();
   } catch (error) {
-    console.error('Could not fetch market data, using mock data instead:', error);
-    return mockMarketData;
+    console.error('Could not fetch market data:', error);
+    return null;
   }
 }
 
-export async function getComparisonData(date: string): Promise<ComparisonChartData[]> {
-  const auditData = await getAuditData();
-  const cauldrons = await getCauldrons();
-
+export function processComparisonData(auditData: AuditData, cauldrons: Cauldron[], date: string): ComparisonChartData[] {
   const cauldronNameMap = cauldrons.reduce((acc, cauldron) => {
     acc[cauldron.id] = cauldron.name;
     return acc;
@@ -93,4 +89,12 @@ export async function getComparisonData(date: string): Promise<ComparisonChartDa
 
   // Filter out entries where both reported and actual are 0
   return chartData.filter(d => d.reported > 0 || d.actual > 0);
+}
+
+export async function getComparisonData(date: string): Promise<ComparisonChartData[]> {
+  const [auditData, cauldrons] = await Promise.all([
+    getAuditData(),
+    getCauldrons(),
+  ]);
+  return processComparisonData(auditData, cauldrons, date);
 }
