@@ -63,3 +63,48 @@ export type NetworkData = {
   edges: NetworkEdge[];
   description: string;
 };
+
+// Types for Optimization Data
+export type CauldronForecast = {
+  current_level: number;
+  drain_rate_per_min: number;
+  fill_rate_per_min: number;
+  max_volume: number;
+  time_to_overflow_min: number;
+};
+
+export type ForecastSummary = {
+  [cauldron_id: string]: CauldronForecast;
+};
+
+export type RouteStep = {
+  amount: number;
+  cauldron_id: string;
+  end: string;
+  start: string;
+  travel_min: number;
+  type: 'collect';
+} | {
+  amount_unloaded: number;
+  end: string;
+  market_node: string;
+  start: string;
+  travel_min: number;
+  type: 'market_unload';
+};
+
+export type Witch = {
+  available_at: string;
+  current_node: string;
+  id: number;
+  remaining_capacity: number;
+  route: RouteStep[];
+};
+
+export type OptimizationData = {
+  forecast_summary: ForecastSummary;
+  market_nodes: string[];
+  num_witches: number;
+  simulation_start: string;
+  witches: Witch[];
+};

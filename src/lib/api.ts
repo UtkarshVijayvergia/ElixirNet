@@ -1,4 +1,4 @@
-import type { AuditData, Cauldron, Market, UnloggedDrainChartData, NetworkData } from './types';
+import type { AuditData, Cauldron, Market, UnloggedDrainChartData, NetworkData, OptimizationData } from './types';
 
 // In a real application, you would fetch from the API endpoint.
 export async function getAuditData(): Promise<AuditData> {
@@ -81,6 +81,19 @@ export async function getNetworkData(): Promise<NetworkData | null> {
     return await response.json();
   } catch (error) {
     console.error('Could not fetch network data:', error);
+    return null;
+  }
+}
+
+export async function getOptimizationData(): Promise<OptimizationData | null> {
+  try {
+    const response = await fetch('/api/optimization');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch optimization data: ${response.statusText}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Could not fetch optimization data:', error);
     return null;
   }
 }
