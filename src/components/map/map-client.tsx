@@ -3,8 +3,7 @@
 import { useState, useMemo } from 'react'
 import type { Cauldron, Market, TransportTicket, GeoJSONFeature } from '@/lib/types'
 import { getCauldronNeighbors } from '@/lib/api'
-import Map from 'react-map-gl';
-import { Marker, Popup, Source, Layer } from 'react-map-gl';
+import MapGL, { Marker, Popup, Source, Layer } from 'react-map-gl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Store, FlaskConical, AlertTriangle } from 'lucide-react'
 import { SidebarTrigger } from '../ui/sidebar';
@@ -111,7 +110,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
       </header>
       <main className="flex-1 p-4 md:p-6 md:pt-0 flex">
         <div className="w-full h-full rounded-lg overflow-hidden border">
-          <Map
+          <MapGL
             mapboxAccessToken={accessToken}
             initialViewState={{
               longitude: mapCenter.longitude,
@@ -200,7 +199,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
                  }}
               />
             </Source>
-          </Map>
+          </MapGL>
         </div>
       </main>
     </div>
