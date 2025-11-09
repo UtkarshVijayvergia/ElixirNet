@@ -24,7 +24,6 @@ export type MismatchedTicket = {
   difference: number;
   abs_difference: number;
   direction: string;
-  date: string; // Added date field
 };
 
 export type AuditData = {
@@ -54,31 +53,13 @@ export type UnloggedDrainChartData = {
   unlogged: number;
 };
 
-export type TransportTicket = {
-  ticket_id: string;
-  cauldron_id: string; // This is the destination cauldron
-  amount_collected: number;
-  courier_id: string;
-  date: string;
+export type NetworkEdge = {
+  from: string;
+  to: string;
+  travel_time_minutes: number;
 };
 
-export type TransportData = {
-  metadata: {
-    total_tickets: number;
-    suspicious_tickets: number;
-    date_range: {
-      start: string;
-      end: string;
-    };
-  };
-  transport_tickets: TransportTicket[];
-};
-
-export type GeoJSONFeature = {
-  type: 'Feature';
-  geometry: {
-    type: 'LineString';
-    coordinates: [number, number][];
-  };
-  properties: Record<string, any>;
+export type NetworkData = {
+  edges: NetworkEdge[];
+  description: string;
 };

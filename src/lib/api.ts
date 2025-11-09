@@ -1,4 +1,4 @@
-import type { AuditData, Cauldron, Market, TransportData, UnloggedDrainChartData } from './types';
+import type { AuditData, Cauldron, Market, UnloggedDrainChartData, NetworkData } from './types';
 
 // In a real application, you would fetch from the API endpoint.
 export async function getAuditData(): Promise<AuditData> {
@@ -71,17 +71,16 @@ export function processUnloggedDrainData(auditData: AuditData, cauldrons: Cauldr
 }
 
 
-export async function getCauldronNeighbors(nodeId: string): Promise<TransportData> {
+export async function getNetworkData(): Promise<NetworkData | null> {
   try {
-    // Call the internal API route instead of the external one
-    const response = await fetch(`/api/neighbors/${nodeId}`);
+    const response = await fetch('/api/network');
     if (!response.ok) {
-      console.error(`Failed to fetch neighbor data: ${response.statusText}`);
-      return { metadata: { total_tickets: 0, suspicious_tickets: 0, date_range: { start: '', end: '' } }, transport_tickets: [] };
+      console.error(`Failed to fetch network data: ${response.statusText}`);
+      return null;
     }
     return await response.json();
   } catch (error) {
-    console.error(`Could not fetch neighbor data for ${nodeId}:`, error);
-    return { metadata: { total_tickets: 0, suspicious_tickets: 0, date_range: { start: '', end: '' } }, transport_tickets: [] };
+    console.error('Could not fetch network data:', error);
+    return null;
   }
 }
