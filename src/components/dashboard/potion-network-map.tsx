@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { Cauldron, Market } from '@/lib/types'
 import { APIProvider, Map, AdvancedMarker, InfoWindow, Pin } from '@vis.gl/react-google-maps'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Store, Cauldron as CauldronIcon, AlertTriangle } from 'lucide-react'
+import { Store, FlaskConical as CauldronIcon, AlertTriangle } from 'lucide-react'
 
 interface PotionNetworkMapProps {
   cauldrons: Cauldron[]
