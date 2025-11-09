@@ -16,7 +16,7 @@ export async function getCauldrons(): Promise<Cauldron[]> {
        console.error(`Failed to fetch cauldron data: ${response.statusText}`);
        return [];
     }
-    return response.json();
+    return await response.json();
   } catch (error) {
     console.error('Could not fetch cauldron data:', error);
     return [];
@@ -30,7 +30,7 @@ export async function getMarket(): Promise<Market | null> {
       console.error(`Failed to fetch market data: ${response.statusText}`);
       return null;
     }
-    return response.json();
+    return await response.json();
   } catch (error) {
     console.error('Could not fetch market data:', error);
     return null;
@@ -45,41 +45,33 @@ export function processComparisonData(auditData: AuditData, cauldrons: Cauldron[
 
   const dataMap = new Map<string, { reported: number, actual: number }>();
 
-  // Initialize with all cauldrons
+  // Initialize with all cauldrons to ensure they appear in the chart
   cauldrons.forEach(c => {
     dataMap.set(c.name, { reported: 0, actual: 0 });
   });
 
-  // From mismatched tickets for the given date (assuming date filtering on mismatched_tickets is needed)
-  // For this example we are not filtering by date from mismatched_tickets
-  auditData.mismatched_tickets.forEach(ticket => {
-    const cauldronName = cauldronNameMap[ticket.cauldron_id] || ticket.cauldron_id;
-    if (dataMap.has(cauldronName)) {
-      const current = dataMap.get(cauldronName)!;
+  // Process mismatched tickets for the selected date
+  auditData.mismatched_tickets
+    .filter(ticket => ticket.date === date)
+    .forEach(ticket => {
+      const cauldronName = cauldronNameMap[ticket.cauldron_id] || ticket.cauldron_id;
+      const current = dataMap.get(cauldronName) || { reported: 0, actual: 0 };
       dataMap.set(cauldronName, {
         reported: current.reported + ticket.ticket_volume,
         actual: current.actual + ticket.detected_volume
       });
-    } else {
-       dataMap.set(cauldronName, {
-        reported: ticket.ticket_volume,
-        actual: ticket.detected_volume
-      });
-    }
-  });
+    });
 
-  // From daily audit for the given date for unlogged drains (actual drain)
-  auditData.daily_audit.filter(d => d.date === date && d.type === 'Unlogged Drain').forEach(entry => {
+  // Process daily audit for unlogged drains on the selected date
+  auditData.daily_audit
+    .filter(d => d.date === date && d.type === 'Unlogged Drain')
+    .forEach(entry => {
       const cauldronName = cauldronNameMap[entry.cauldron_id] || entry.cauldron_id;
-      if (dataMap.has(cauldronName)) {
-        const current = dataMap.get(cauldronName)!;
-        dataMap.set(cauldronName, {
-          ...current,
-          actual: current.actual + entry.volume
-        });
-      } else {
-        dataMap.set(cauldronName, { reported: 0, actual: entry.volume });
-      }
+      const current = dataMap.get(cauldronName) || { reported: 0, actual: 0 };
+      dataMap.set(cauldronName, {
+        ...current,
+        actual: current.actual + entry.volume
+      });
   });
 
   const chartData: ComparisonChartData[] = Array.from(dataMap.entries()).map(([cauldron_id, values]) => ({
@@ -87,7 +79,7 @@ export function processComparisonData(auditData: AuditData, cauldrons: Cauldron[
     ...values
   }));
 
-  // Filter out entries where both reported and actual are 0
+  // Filter out entries where both reported and actual are 0 to keep the chart clean
   return chartData.filter(d => d.reported > 0 || d.actual > 0);
 }
 

@@ -24,6 +24,7 @@ export type MismatchedTicket = {
   difference: number;
   abs_difference: number;
   direction: string;
+  date: string; // Added date field
 };
 
 export type AuditData = {
