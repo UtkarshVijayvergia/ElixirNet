@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import type { ComparisonChartData, Cauldron } from '@/lib/types'
+import type { ComparisonChartData, Cauldron, AuditData } from '@/lib/types'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -11,9 +11,13 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
-import { getCauldrons, getAuditData, processComparisonData } from '@/lib/api'
+import { getAuditData, processComparisonData } from '@/lib/api'
 import { SidebarTrigger } from '../ui/sidebar'
 import { Skeleton } from '../ui/skeleton'
+
+interface VisualizationClientProps {
+  cauldrons: Cauldron[];
+}
 
 const LoadingSkeleton = () => (
     <Card>
@@ -32,17 +36,15 @@ const LoadingSkeleton = () => (
     </Card>
 )
 
-export default function VisualizationClient() {
+export default function VisualizationClient({ cauldrons }: VisualizationClientProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const [data, setData] = useState<ComparisonChartData[]>([])
-  const [cauldrons, setCauldrons] = useState<Cauldron[]>([]);
   const [date, setDate] = useState<Date | undefined>(() => {
       const dateParam = searchParams.get('date');
-      // Add timezone offset to avoid hydration mismatch
-      return dateParam ? new Date(`${dateParam}T00:00:00`) : new Date();
+      return dateParam ? new Date(dateParam + 'T00:00:00') : new Date();
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,14 +54,10 @@ export default function VisualizationClient() {
     setError(null);
     try {
         const dateString = format(selectedDate, 'yyyy-MM-dd');
-        const [auditData, cauldronData] = await Promise.all([
-            getAuditData(),
-            getCauldrons()
-        ]);
+        const auditData = await getAuditData();
         
-        const comparisonData = processComparisonData(auditData, cauldronData, dateString);
+        const comparisonData = processComparisonData(auditData, cauldrons, dateString);
         setData(comparisonData);
-        setCauldrons(cauldronData);
 
         const newSearchParams = new URLSearchParams(searchParams.toString());
         newSearchParams.set('date', dateString);
@@ -71,7 +69,7 @@ export default function VisualizationClient() {
     } finally {
       setLoading(false);
     }
-  }, [pathname, router, searchParams]);
+  }, [cauldrons, pathname, router, searchParams]);
 
   useEffect(() => {
     if (date) {
