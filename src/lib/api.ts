@@ -1,5 +1,5 @@
 import type { AuditData, Cauldron, Market, ComparisonChartData } from './types';
-import { mockAuditData } from './mock-data';
+import { mockAuditData, mockCauldronData, mockMarketData } from './mock-data';
 
 // In a real application, you would fetch from the API endpoint.
 // For this example, we are using mock data as localhost is not accessible during build.
@@ -26,8 +26,8 @@ export async function getCauldrons(): Promise<Cauldron[]> {
     }
     return response.json();
   } catch (error) {
-    console.error('Could not fetch cauldron data:', error);
-    return [];
+    console.error('Could not fetch cauldron data, using mock data instead:', error);
+    return mockCauldronData;
   }
 }
 
@@ -39,8 +39,8 @@ export async function getMarket(): Promise<Market | null> {
     }
     return response.json();
   } catch (error) {
-    console.error('Could not fetch market data:', error);
-    return null;
+    console.error('Could not fetch market data, using mock data instead:', error);
+    return mockMarketData;
   }
 }
 
