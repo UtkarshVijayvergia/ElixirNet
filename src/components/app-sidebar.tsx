@@ -9,7 +9,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
-import PotionTrackLogo from '@/components/icons/potion-track-logo'
+import ElixirNetLogo from '@/components/icons/elixir-net-logo'
 import { Home, BarChart2, Map, Wand } from 'lucide-react'
 import Link from 'next/link'
 
@@ -19,7 +19,7 @@ export default function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <PotionTrackLogo />
+        <ElixirNetLogo />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>

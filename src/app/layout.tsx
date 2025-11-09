@@ -13,12 +13,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import PotionTrackLogo from '@/components/icons/potion-track-logo'
+import ElixirNetLogo from '@/components/icons/elixir-net-logo'
 import { Home, BarChart } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar';
 
 export const metadata: Metadata = {
-  title: 'PotionTrack',
+  title: 'ElixirNet',
   description: 'Real-time cauldron monitoring and audit platform.',
 };
 
