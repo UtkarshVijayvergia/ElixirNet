@@ -57,7 +57,7 @@ export default function MapClient({ cauldrons, market }: MapClientProps) {
   }, []);
 
   const nodeMap = useMemo(() => {
-    const map = new Map<string, { latitude: number; longitude: number }>();
+    const map = new Map<string, { latitude: number; longitude: number; name: string }>();
     cauldrons.forEach(c => map.set(c.id, c));
     if (market) {
       map.set(market.id, market);
