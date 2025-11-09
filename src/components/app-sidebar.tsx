@@ -24,24 +24,20 @@ export default function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/">
-              <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="Dashboard">
-                <span>
-                  <Home />
-                  Dashboard
-                </span>
-              </SidebarMenuButton>
-            </Link>
+            <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="Dashboard">
+              <Link href="/">
+                <Home />
+                Dashboard
+              </Link>
+            </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-             <Link href="/visualizations">
-              <SidebarMenuButton asChild isActive={pathname === '/visualizations'} tooltip="Visualizations">
-                <span>
-                  <BarChart2 />
-                  Visualizations
-                </span>
-              </SidebarMenuButton>
-            </Link>
+            <SidebarMenuButton asChild isActive={pathname === '/visualizations'} tooltip="Visualizations">
+              <Link href="/visualizations">
+                <BarChart2 />
+                Visualizations
+              </Link>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
